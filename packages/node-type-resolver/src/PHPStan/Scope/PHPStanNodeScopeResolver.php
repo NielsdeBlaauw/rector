@@ -178,13 +178,15 @@ final class PHPStanNodeScopeResolver
     /**
      * @param Class_|Interface_ $classLike
      */
-    private function resolveClassOrInterfaceScope(ClassLike $classLike, Scope $scope): MutatingScope
+    private function resolveClassOrInterfaceScope(ClassLike $classLike, Scope $scope): Scope
     {
         $className = $this->resolveClassName($classLike);
 
         // is anonymous class? - not possible to enter it since PHPStan 0.12.33, see https://github.com/phpstan/phpstan-src/commit/e87fb0ec26f9c8552bbeef26a868b1e5d8185e91
         if ($classLike instanceof Class_ && Strings::match($className, self::ANONYMOUS_CLASS_START_REGEX)) {
             $classReflection = $this->reflectionProvider->getAnonymousClassReflection($classLike, $scope);
+        } elseif (! $this->reflectionProvider->hasClass($className)) {
+            return $scope;
         } else {
             $classReflection = $this->reflectionProvider->getClass($className);
         }

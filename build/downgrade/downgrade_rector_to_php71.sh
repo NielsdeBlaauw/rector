@@ -1,21 +1,8 @@
 #!/bin/bash
 ########################################################################
-# This bash script downgrades the code to the selected PHP version
+# This bash script downgrades Rector code and its vendor to PHP 7.1
 #
-# Usage from within a GitHub workflow:
-# build/downgrade/downgrade_packages.sh $target_php_version
-# where $target_php_version is one of the following values:
-# - 7.0
-# - 7.1
-# - 7.2
-# - 7.3
-# - 7.4
-#
-# Currently highest PHP version from which we can downgrade:
-# - 8.0
-#
-# Eg: To downgrade to PHP 7.1, execute:
-# build/downgrade/downgrade_packages.sh 7.1
+# Use: build/downgrade/downgrade_rector_to_php71.sh
 ########################################################################
 
 # show errors
@@ -24,12 +11,9 @@ set -e
 ########################################################################
 # Variables to modify when new PHP versions are released
 # ----------------------------------------------------------------------
-supported_target_php_versions=(7.0 7.1 7.2 7.3 7.4)
-
 # Execute a single call to Rector for all dependencies together?
 DOWNGRADE_DEPENDENCIES_TOGETHER=true
 
-downgrade_php_whynots="7.1.*";
 downgrade_php_rectorconfigs=(["7.1"]="latest-to-php71")
 
 ########################################################################
@@ -70,6 +54,7 @@ rootPackage=$(composer info -s -N)
 numberTargetPHPVersions=${7.1.*}
 
 counter=1
+
 while [ $counter -le $numberTargetPHPVersions ]
 do
     pos=$(( $counter - 1 ))
@@ -109,11 +94,11 @@ composer install --no-progress --ansi
 
 # Make sure that the number of packages, paths and sets is the same
 # otherwise something went wrong
-numberPackages=${#packages_to_downgrade[@]}
-numberRectorConfigs=${#rectorconfigs_to_downgrade[@]}
-if [ ! $numberRectorConfigs -eq $numberPackages ]; then
-    fail "Number of Rector configs ($numberRectorConfigs) and number of packages ($numberPackages) should not be different"
-fi
+#numberPackages=${#packages_to_downgrade[@]}
+#numberRectorConfigs=${#rectorconfigs_to_downgrade[@]}
+#if [ ! $numberRectorConfigs -eq $numberPackages ]; then
+#    fail "Number of Rector configs ($numberRectorConfigs) and number of packages ($numberPackages) should not be different"
+#fi
 
 # Execute a single call to Rector for all dependencies together:
 # If grouping the PHP-version downgrades together, and downgrading the packages together
