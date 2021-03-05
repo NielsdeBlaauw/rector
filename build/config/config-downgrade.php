@@ -20,9 +20,9 @@ return static function (ContainerConfigurator $containerConfigurator): void {
 
     $parameters->set(Option::SETS, [
         DowngradeSetList::PHP_80,
-//        DowngradeSetList::PHP_74,
-//        DowngradeSetList::PHP_73,
-//        DowngradeSetList::PHP_72,
+        DowngradeSetList::PHP_74,
+        DowngradeSetList::PHP_73,
+        DowngradeSetList::PHP_72,
     ]);
 };
 
