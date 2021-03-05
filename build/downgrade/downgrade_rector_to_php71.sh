@@ -53,20 +53,9 @@ function note {
 }
 ########################################################################
 
-target_php_version=$1
-if [ -z "$target_php_version" ]; then
-    versions=$(join_by ", " ${supported_target_php_versions[@]})
-    fail "Please provide to which PHP version to downgrade to ($versions) as first argument to the bash script"
-fi
-
-# Check the version is supported
-if [[ ! " ${supported_target_php_versions[@]} " =~ " ${target_php_version} " ]]; then
-    versions=$(join_by ", " ${supported_target_php_versions[@]})
-    fail "Version $target_php_version is not supported for downgrading. Supported versions: $versions"
-fi
-
-target_downgrade_php_whynots="php71"
-target_downgrade_php_rectorconfigs=($(echo ${downgrade_php_rectorconfigs[$target_php_version]} | tr " " "\n"))
+target_php_version="php71"
+target_downgrade_php_whynots="php 7.1.0"
+target_downgrade_php_rectorconfigs="config-downgrade-to-php71.php"
 
 packages_to_downgrade=()
 rectorconfigs_to_downgrade=()
