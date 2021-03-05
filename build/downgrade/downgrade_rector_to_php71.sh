@@ -26,55 +26,12 @@ set -e
 # ----------------------------------------------------------------------
 supported_target_php_versions=(7.0 7.1 7.2 7.3 7.4)
 
-# Rector configs carry the previous downgrade sets starting from php80
-# (eg: latest-to-php73 has downgrade sets php80 and php74)
-# so even though we're storing all the stages, only the last item must be executed
-# (only latest-to-php73, no need for latest-to-php74) or a same downgrade will be executed more than once
-# This logic is a bit redundant, but it enables to execute several config files on each package,
-# eg: defining the set to execute using `--set` in the CLI (not supported anymore)
-GROUP_RECTOR_CONFIGS=true
-
 # Execute a single call to Rector for all dependencies together?
 DOWNGRADE_DEPENDENCIES_TOGETHER=true
 
-# If grouping rector configs, analyze if the libraries support
-# only the target PHP version
-# Otherwise, analyze PHP support starting from the latest PHP version
-# (currently 8.0) to the target one, so different libraries can be
-# downgraded only for their needed versions, not all of them
-declare -A downgrade_php_whynots
-declare -A downgrade_php_rectorconfigs
-if [ -n "$GROUP_RECTOR_CONFIGS" ]; then
-    downgrade_php_whynots=( \
-        ["7.0"]="7.0.*" \
-        ["7.1"]="7.1.*" \
-        ["7.2"]="7.2.*" \
-        ["7.3"]="7.3.*" \
-        ["7.4"]="7.4.*" \
-    )
-    downgrade_php_rectorconfigs=( \
-        ["7.0"]="latest-to-php70" \
-        ["7.1"]="latest-to-php71" \
-        ["7.2"]="latest-to-php72" \
-        ["7.3"]="latest-to-php73" \
-        ["7.4"]="latest-to-php74" \
-    )
-else
-    downgrade_php_whynots=( \
-        ["7.0"]="7.4.* 7.3.* 7.2.* 7.1.* 7.0.*" \
-        ["7.1"]="7.4.* 7.3.* 7.2.* 7.1.*" \
-        ["7.2"]="7.4.* 7.3.* 7.2.*" \
-        ["7.3"]="7.4.* 7.3.*" \
-        ["7.4"]="7.4.*" \
-    )
-    downgrade_php_rectorconfigs=( \
-        ["7.0"]="php80-to-74 php74-to-73 php73-to-72 php72-to-71 php71-to-70" \
-        ["7.1"]="php80-to-74 php74-to-73 php73-to-72 php72-to-71" \
-        ["7.2"]="php80-to-74 php74-to-73 php73-to-72" \
-        ["7.3"]="php80-to-74 php74-to-73" \
-        ["7.4"]="php80-to-74" \
-    )
-fi
+downgrade_php_whynots="7.1.*";
+downgrade_php_rectorconfigs=(["7.1"]="latest-to-php71")
+
 ########################################################################
 # Helper functions
 # ----------------------------------------------------------------------
@@ -108,7 +65,7 @@ if [[ ! " ${supported_target_php_versions[@]} " =~ " ${target_php_version} " ]];
     fail "Version $target_php_version is not supported for downgrading. Supported versions: $versions"
 fi
 
-target_downgrade_php_whynots=($(echo ${downgrade_php_whynots[$target_php_version]} | tr " " "\n"))
+target_downgrade_php_whynots="php71"
 target_downgrade_php_rectorconfigs=($(echo ${downgrade_php_rectorconfigs[$target_php_version]} | tr " " "\n"))
 
 packages_to_downgrade=()
@@ -121,7 +78,8 @@ composer install --no-dev --no-progress --ansi
 
 rootPackage=$(composer info -s -N)
 
-numberTargetPHPVersions=${#target_downgrade_php_whynots[@]}
+numberTargetPHPVersions=${7.1.*}
+
 counter=1
 while [ $counter -le $numberTargetPHPVersions ]
 do
