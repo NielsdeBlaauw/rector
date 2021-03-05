@@ -22,9 +22,9 @@ final class FollowedByCommaAnalyzer
         $this->tokensByFilePathStorage = $tokensByFilePathStorage;
     }
 
-    public function isFollowed(Node $arg): bool
+    public function isFollowed(Node $node): bool
     {
-        $smartFileInfo = $arg->getAttribute(AttributeKey::FILE_INFO);
+        $smartFileInfo = $node->getAttribute(AttributeKey::FILE_INFO);
         if (! $smartFileInfo instanceof SmartFileInfo) {
             return false;
         }
@@ -36,7 +36,7 @@ final class FollowedByCommaAnalyzer
         $parsedStmtsAndTokens = $this->tokensByFilePathStorage->getForFileInfo($smartFileInfo);
         $oldTokens = $parsedStmtsAndTokens->getOldTokens();
 
-        $nextTokenPosition = $arg->getEndTokenPos() + 1;
+        $nextTokenPosition = $node->getEndTokenPos() + 1;
         while (isset($oldTokens[$nextTokenPosition])) {
             $currentToken = $oldTokens[$nextTokenPosition];
 
