@@ -16,6 +16,8 @@ return static function (ContainerConfigurator $containerConfigurator): void {
     $excludedPaths = array_merge(DowngradeRectorConfig::RECTOR_EXCLUDE_PATHS, DowngradeRectorConfig::DEPENDENCY_EXCLUDE_PATHS);
     $parameters->set(Option::SKIP, $excludedPaths);
 
+    $parameters->set(Option::PHPSTAN_FOR_RECTOR_PATH, null);
+
     $parameters->set(Option::SETS, [
         DowngradeSetList::PHP_80,
         DowngradeSetList::PHP_74,
@@ -52,9 +54,12 @@ final class DowngradeRectorConfig
      */
     public const RECTOR_EXCLUDE_PATHS = [
         '*/tests/*',
+        '*/Source/*',
+        '*/Source*/*',
+        '*/Fixture/*',
+        '*/Fixture*/*',
+        '*/Expected/*',
+        '*/Expected*/*',
         __DIR__ . '/../../packages/rector-generator/templates/*',
-        __DIR__ . '/../../vendor/*',
-        __DIR__ . '/../../ci/*',
-        __DIR__ . '/../../stubs/*',
     ];
 }

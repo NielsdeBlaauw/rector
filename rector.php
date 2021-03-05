@@ -79,8 +79,11 @@ return static function (ContainerConfigurator $containerConfigurator): void {
 
         // test paths
         '*/Fixture/*',
+        '*/Fixture/*',
         '*/Source/*',
+        '*/Source*/*',
         '*/Expected/*',
+        '*/Expected*/*',
 
         __DIR__ . '/packages/doctrine-annotation-generated/src',
         // template files

@@ -1,13 +1,29 @@
-name: Rector Run
+name: Downgrade Rector
 
 on:
+    pull_request: null
     push:
         branches:
             - master
 
 jobs:
-    downgrade_php71:
+    # to PHP 7.1
+    downgrade_rector:
         runs-on: ubuntu-latest
+
+        strategy:
+            fail-fast: false
+            matrix:
+                directories:
+                    - rules/arguments rules/autodiscovery rules/cakephp rules/carbon rules/code-quality rules/code-quality-strict rules/coding-style rules/composer rules/dead-code rules/dead-doc-block rules/defluent rules/dependency-injection rules/doctrine rules/doctrine-code-quality rules/doctrine-gedmo-to-knplabs rules/downgrade-php70  rules/downgrade-php71 rules/downgrade-php72 rules/downgrade-php73 rules/naming rules/nette rules/nette-code-quality rules/nette-kdyby
+
+                    - rules/downgrade-php74 rules/downgrade-php80 rules/early-return rules/generics rules/laravel rules/legacy rules/mockery-to-prophecy rules/mysql-to-mysqli rules/symfony3 rules/symfony4 rules/symfony5 rules/transform rules/type-declaration rules/visibility
+
+                    - rules/nette-tester-to-phpunit rules/nette-to-symfony rules/nette-utils-code-quality rules/order rules/php-office rules/php-spec-to-phpunit rules/php52 rules/php53 rules/php54 rules/php55 rules/php56 rules/php70 rules/php71 rules/php72 rules/php73 rules/php74 rules/php80 rules/phpunit rules/phpunit-symfony rules/privatization rules/psr4 rules/removing rules/removing-static rules/renaming rules/restoration rules/sensio rules/symfony rules/symfony-code-quality rules/symfony-php-config rules/symfony2
+                    - utils
+                    - packages
+                    - src
+                    - vendor
 
         steps:
             -   uses: actions/checkout@v2
@@ -20,20 +36,13 @@ jobs:
 
             # The Symfony Polyfill libraries are needed
             -   run: composer require symfony/polyfill-php72 symfony/polyfill-php73 symfony/polyfill-php74 symfony/polyfill-php80 --no-install --no-update
+            -   run: composer install --no-progress --ansi --no-dev
 
             # Execute the downgrade script
-            -   run: sh ci/downgrade/config/config-downgrade.php
+#            -   run: bin/rector process src packages rules --config build/config/config-downgrade.php
+#            -   run: bin/rector vendor --config build/config/config-downgrade.php
 
-            # Upload the artifact so we can download and review the downgraded code
-#            -   run: mkdir build
-#            -   uses: montudor/action-zip@v0.1.1
-#                with:
-#                    args: zip -X -r build/rector-php71.zip . -x *.git* .* "*/\.*" build** ci** tests** "**/tests**"
-#
-#            -   uses: actions/upload-artifact@v2
-#                with:
-#                    name: rector-downgraded-code
-#                    path: build/rector-php71.zip
+            -   run: bin/rector process ${{ matrix.directories }} --config build/config/config-downgrade.php --ansi --no-progress-bar
 
             # Run all the tests on PHP 7.4 (because JUnit needs PHP 7.3+),
             # but using Rector downgraded to PHP 7.1
@@ -53,16 +62,6 @@ jobs:
 #            # Rector without DEV needs phpstan.neon removed
 #            -   run: rm phpstan.neon
 #            -   run: rm phpstan-for-rector.neon
-#
-#            # Override the artifact with downgraded Composer too
-##            -   run: rm build/rector-php71.zip
-##            -   uses: montudor/action-zip@v0.1.1
-##                with:
-##                    args: zip -X -r build/rector-php71.zip . -x *.git* .* "*/\.*" build**
-##            -   uses: actions/upload-artifact@v2
-##                with:
-##                    name: rector-downgraded-code
-##                    path: build/rector-php71.zip
 #
 #            # Switch to PHP 7.1 and run PHPStan to analyze the code,
 #            # as to make sure no 7.2+ code was left behind (if there is, PHP will throw some error)
