@@ -38,15 +38,21 @@ jobs:
             -   run: composer require symfony/polyfill-php72 symfony/polyfill-php73 symfony/polyfill-php74 symfony/polyfill-php80 --no-install --no-update
             -   run: composer install --no-progress --ansi --no-dev
 
-            # Execute the downgrade script
-#            -   run: bin/rector process src packages rules --config build/config/config-downgrade.php
-#            -   run: bin/rector vendor --config build/config/config-downgrade.php
-
+            # parallel run is needed here, to speed it up
             -   run: bin/rector process ${{ matrix.directories }} --config build/config/config-downgrade.php --ansi --no-progress-bar
+
+    # run tests after split or here?
+    run_downgraded_tests:
+        runs-on: ubuntu-latest
+        needs: downgrade_rector
 
             # Run all the tests on PHP 7.4 (because JUnit needs PHP 7.3+),
             # but using Rector downgraded to PHP 7.1
-#            -   run: vendor/bin/phpunit
+
+        steps:
+            -   run: composer install --no-dev
+            -   run: vendor/bin/phpunit
+
 #
 #            # Avoid Composer v2 platform checks (composer.json requires PHP 7.3+, but below we are running 7.1)
 #            -   run: composer config platform-check false
