@@ -4,18 +4,15 @@ declare(strict_types=1);
 
 namespace Rector\DowngradePhp73\Rector\FuncCall;
 
-use Nette\Utils\Strings;
 use PhpParser\Node;
-use PhpParser\Node\Arg;
 use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\StaticCall;
-use Rector\Core\Application\TokensByFilePathStorage;
 use Rector\Core\Rector\AbstractRector;
+use Rector\DowngradePhp73\Tokenizer\FollowedByCommaAnalyzer;
 use Rector\NodeTypeResolver\Node\AttributeKey;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
-use Symplify\SmartFileSystem\SmartFileInfo;
 
 /**
  * @see \Rector\DowngradePhp73\Tests\Rector\FuncCall\DowngradeTrailingCommasInFunctionCallsRector\DowngradeTrailingCommasInFunctionCallsRectorTest
@@ -23,13 +20,13 @@ use Symplify\SmartFileSystem\SmartFileInfo;
 final class DowngradeTrailingCommasInFunctionCallsRector extends AbstractRector
 {
     /**
-     * @var TokensByFilePathStorage
+     * @var FollowedByCommaAnalyzer
      */
-    private $tokensByFilePathStorage;
+    private $followedByCommaAnalyzer;
 
-    public function __construct(TokensByFilePathStorage $tokensByFilePathStorage)
+    public function __construct(FollowedByCommaAnalyzer $followedByCommaAnalyzer)
     {
-        $this->tokensByFilePathStorage = $tokensByFilePathStorage;
+        $this->followedByCommaAnalyzer = $followedByCommaAnalyzer;
     }
 
     public function getRuleDefinition(): RuleDefinition
@@ -83,7 +80,7 @@ CODE_SAMPLE
             $lastArgumentPosition = array_key_last($node->args);
 
             $last = $node->args[$lastArgumentPosition];
-            if (! $this->isNodeFollowedByComma($last)) {
+            if (! $this->followedByCommaAnalyzer->isFollowed($last)) {
                 return null;
             }
 
@@ -93,40 +90,5 @@ CODE_SAMPLE
         }
 
         return $node;
-    }
-
-    private function isNodeFollowedByComma(Arg $arg): bool
-    {
-        $smartFileInfo = $arg->getAttribute(AttributeKey::FILE_INFO);
-        if (! $smartFileInfo instanceof SmartFileInfo) {
-            return false;
-        }
-
-        if (! $this->tokensByFilePathStorage->hasForFileInfo($smartFileInfo)) {
-            return false;
-        }
-
-        $parsedStmtsAndTokens = $this->tokensByFilePathStorage->getForFileInfo($smartFileInfo);
-        $oldTokens = $parsedStmtsAndTokens->getOldTokens();
-
-        $nextTokenPosition = $arg->getEndTokenPos() + 1;
-        while (isset($oldTokens[$nextTokenPosition])) {
-            $currentToken = $oldTokens[$nextTokenPosition];
-
-            // only space
-            if (is_array($currentToken) || Strings::match($currentToken, '#\s+#')) {
-                ++$nextTokenPosition;
-                continue;
-            }
-
-            // without comma
-            if ($currentToken === ')') {
-                return false;
-            }
-
-            break;
-        }
-
-        return true;
     }
 }

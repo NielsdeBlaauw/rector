@@ -617,3 +617,4 @@ parameters:
                 - src/Console/Command/ProcessCommand.php
 
         - '#Content of method "getNextExpression\(\)" is duplicated with method "getNextExpression\(\)" in "Rector\\CodingStyle\\Rector\\Assign\\ManualJsonStringToJsonEncodeArrayRector" class\. Use unique content or service instead#'
+        - '#Method Rector\\DowngradePhp80\\Rector\\ClassMethod\\DowngradeTrailingCommasInParamUseRector\:\:processUses\(\) should return PhpParser\\Node\\Expr\\Closure but returns PhpParser\\Node#'
